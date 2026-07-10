@@ -1,6 +1,5 @@
-import { buildFacebookPostPrompt } from './prompts/facebookPostPrompt.js';
-import { generateContent } from './services/geminiService.js';
 import { testConnection } from './services/supabaseService.js';
+import { generateAndSavePost } from './services/postService.js';
 
 async function main() {
   try {
@@ -8,13 +7,12 @@ async function main() {
     console.log('✅ Supabase Connected');
     console.log('Returned row:', connectionResult.data);
 
-    const prompt = buildFacebookPostPrompt();
-    const responseText = await generateContent(prompt);
+    const insertedPost = await generateAndSavePost();
 
-    console.log('=== Generated Facebook Post ===');
-    console.log(responseText);
+    console.log('✅ Post generated successfully');
+    console.log('Inserted row:', insertedPost);
   } catch (error) {
-    console.error('Supabase connection failed:', error.message);
+    console.error('Post workflow failed:', error.message);
     process.exit(1);
   }
 }
