@@ -19,7 +19,7 @@ export function generateImagePrompt(post = {}) {
     : String(post.hashtags || '');
 
   // Build a concise topic summary from the available content.
-  const topicSummary = [title, facts, caption, question, hashtags]
+  const topicSummary = [title, facts, caption, question,]
     .filter(Boolean)
     .join(' ')
     .trim();

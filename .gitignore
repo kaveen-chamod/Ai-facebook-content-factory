@@ -8,6 +8,8 @@ logs/
 
 dist/
 
+output/
+
 build/
 
 *.log
