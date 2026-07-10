@@ -1,9 +1,9 @@
-import { getImageProvider } from "../src/config/imageConfig.js";
-import { createImageProvider } from "../src/providers/image/providerFactory.js";
+import { createImageProvider } from '../src/providers/image/providerFactory.js';
 
-const providerName = getImageProvider();
+const provider = createImageProvider('google');
 
-const provider = createImageProvider(providerName);
+const result = await provider.generateImage(
+  'A peaceful American park in autumn, smiling senior couple walking together, photorealistic, warm golden sunlight, realistic photography, 16:9'
+);
 
-console.log("Provider:", providerName);
-console.log(provider);
+console.log(result);

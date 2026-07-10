@@ -13,8 +13,12 @@ const apiKey = process.env.GEMINI_API_KEY;
 // Initialize a single shared Gemini client
 const ai = new GoogleGenAI({ apiKey });
 
-// Default model for text generation
-const DEFAULT_MODEL = 'gemini-2.5-flash';
+// Gemini model selection
+// The model id is configurable via the GEMINI_MODEL environment variable.
+// If GEMINI_MODEL is not set, default to a safe baseline model optimized
+// for text generation. Changing the environment variable allows runtime
+// selection of different Gemini models without modifying source code.
+const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
 
 // Retry transient API failures up to three times.
 const MAX_RETRIES = 3;
