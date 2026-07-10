@@ -13,9 +13,11 @@ export const classicTemplate = {
 
   // The main title text displayed on the graphic.
   title: {
-    text: 'AI Facebook Content Factory',
-    position: 'top-center',
-    fontSize: 48,
+    position: "top-center",
+    maxWidth: 900,
+    fontSize: 72,
+    fontWeight: "bold",
+    color: "#FFFFFF"
   },
 
   // The supporting subtitle text under the main title.
@@ -27,9 +29,10 @@ export const classicTemplate = {
 
   // The visual brand element used in the graphic.
   logo: {
-    enabled: true,
-    position: 'bottom-right',
-    size: 120,
+    enabled:true,
+    position:"bottom-left",
+    maxWidth:120,
+    opacity:1
   },
 
   // The footer text shown at the bottom of the graphic.
@@ -41,16 +44,18 @@ export const classicTemplate = {
 
   // The color palette used for the design.
   colors: {
-    background: '#F8F7F3',
-    primary: '#2F5D50',
-    accent: '#D9A441',
-    text: '#1F2A2E',
+    background:"#ffffff",
+    title:"#ffffff",
+    subtitle:"#ffffff",
+    accent:"#FFC107",
+    footer:"#ffffff"
   },
 
   // The font settings for the graphic content.
   fonts: {
-    titleFont: 'Arial',
-    bodyFont: 'Georgia',
+    title:"Poppins Bold",
+    subtitle:"Poppins Medium",
+    body:"Inter"
   },
 
   // The overlay styling used to improve readability.
