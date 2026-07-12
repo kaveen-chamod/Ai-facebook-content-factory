@@ -13,6 +13,11 @@ dotenv.config();
 // Read the API key from the environment.
 const apiKey = process.env.GEMINI_API_KEY;
 
+if (!apiKey) {
+    throw new Error("Missing GEMINI_API_KEY");
+}
+
+
 // Create a singleton Google GenAI client for image requests.
 const googleGenAI = new GoogleGenAI({ apiKey });
 

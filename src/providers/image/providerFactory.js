@@ -1,17 +1,20 @@
-// Purpose: Centralize provider selection for the image generation architecture.
-// This factory pattern keeps the rest of the application decoupled from specific providers.
+import { GoogleImageProvider } from "./googleImageProvider.js";
+import { PollinationsImageProvider } from "./pollinationsImageProvider.js";
 
-import { GoogleImageProvider } from './googleImageProvider.js';
+export function createImageProvider(
+    provider = process.env.IMAGE_PROVIDER || "google"
+) {
 
-/**
- * Create an image provider instance based on the requested provider name.
- * @param {string} [provider='google'] - The provider identifier.
- * @returns {import('./imageProvider.js').ImageProvider} A provider instance.
- */
-export function createImageProvider(provider = 'google') {
-  if (provider === 'google') {
-    return new GoogleImageProvider();
-  }
+    switch (provider) {
 
-  throw new Error(`Unsupported image provider: ${provider}`);
+        case "google":
+            return new GoogleImageProvider();
+
+        case "pollinations":
+            return new PollinationsImageProvider();
+
+        default:
+            throw new Error(`Unsupported image provider: ${provider}`);
+    }
+
 }

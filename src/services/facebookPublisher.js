@@ -1,217 +1,227 @@
-// Purpose: Publish generated posts to a Facebook Page using Meta Graph API.
+﻿// Purpose: Publish generated posts (with image) to a Facebook Page using Meta Graph API.
 
 import dotenv from "dotenv";
+import fs from "fs/promises";
 
 dotenv.config();
 
 const PAGE_ID = process.env.FACEBOOK_PAGE_ID;
 const ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
 
-
 /**
- * Normalize and validate hashtags input.
+ * Normalize hashtags so the final caption is clean and Facebook-friendly.
  */
 function normalizeHashtags(rawHashtags) {
-
   if (!rawHashtags) return [];
-
 
   let parts = [];
 
-
   if (Array.isArray(rawHashtags)) {
-
+    parts = rawHashtags.map(tag => String(tag).trim()).filter(Boolean);
+  } else if (typeof rawHashtags === "string") {
     parts = rawHashtags
-      .map((h)=>String(h).trim())
+      .split(/[\s,|]+/)
+      .map(tag => tag.trim())
       .filter(Boolean);
-
-  } 
-  else if (typeof rawHashtags === "string") {
-
-    parts = rawHashtags
-      .split(/[,\s|]+/)
-      .map((p)=>p.trim())
-      .filter(Boolean);
-
-  }
-  else {
-
+  } else {
     throw new Error("hashtags must be an array or string");
-
   }
 
-
-  return parts.map(tag=>{
-
-    const clean = tag
-      .replace(/^#+/,"")
-      .replace(/\s+/g,"");
-
-
-    return clean ? `#${clean}` : "";
-
-  }).filter(Boolean);
-
+  return parts
+    .map(tag => {
+      const clean = tag.replace(/^#+/, "").replace(/\s+/g, "");
+      return clean ? `#${clean}` : "";
+    })
+    .filter(Boolean);
 }
 
-
-
 /**
- * Build Facebook message.
+ * Build the final Facebook message.
  */
-function buildFacebookMessage(caption, hashtagsArr){
+function buildFacebookMessage(caption, hashtags) {
+  const captionText = caption ? String(caption).trim() : "";
+  const hashtagsText = hashtags.length
+    ? `\n\n${hashtags.join(" ")}`
+    : "";
 
-  const captionText = caption
-      ? String(caption).trim()
-      : "";
-
-
-  const tagsText = hashtagsArr.length
-      ? `\n\n${hashtagsArr.join(" ")}`
-      : "";
-
-
-  return `${captionText}${tagsText}`.trim();
-
+  return `${captionText}${hashtagsText}`.trim();
 }
 
-
-
 /**
- * Publish post to Facebook Page.
+ * Publish post to Facebook.
  */
-export async function publishPost(post){
+export async function publishPost(post) {
 
-
-  if(!post || typeof post !== "object"){
-
-    throw new Error(
-      "Invalid post object"
-    );
-
+  if (!post || typeof post !== "object") {
+    throw new Error("Invalid post object");
   }
-
-
 
   const {
     title,
     caption,
-    hashtags
+    hashtags,
+    imagePath
   } = post;
 
-
-
-  if(!title || !caption){
-
-    throw new Error(
-      "Title and caption are required"
-    );
-
+  if (!title?.trim()) {
+    throw new Error("Title is required.");
   }
 
-
-
-  if(!PAGE_ID || !ACCESS_TOKEN){
-
-    throw new Error(
-      "Missing FACEBOOK_PAGE_ID or FACEBOOK_ACCESS_TOKEN in .env"
-    );
-
+  if (!caption?.trim()) {
+    throw new Error("Caption is required.");
   }
 
+  if (!PAGE_ID || !ACCESS_TOKEN) {
+    throw new Error(
+      "Missing FACEBOOK_PAGE_ID or FACEBOOK_ACCESS_TOKEN."
+    );
+  }
 
-
-  try{
-
+  try {
 
     const tagsArray = normalizeHashtags(hashtags);
+    const message = buildFacebookMessage(caption, tagsArray);
 
+    let response;
 
+    // -------------------------------------------------
+    // IMAGE POST
+    // -------------------------------------------------
+    if (imagePath) {
 
-    const message = buildFacebookMessage(
-      caption,
-      tagsArray
-    );
+      console.log("================================");
+      console.log("Uploading IMAGE to Facebook...");
+      console.log("Page:", PAGE_ID);
+      console.log("Image:", imagePath);
+      console.log("================================");
 
+      // Read image
+      const imageBuffer = await fs.readFile(imagePath);
 
+      // Convert to Blob
+      const imageBlob = new Blob(
+        [imageBuffer],
+        {
+          type: "image/png"
+        }
+      );
 
-    const response = await fetch(
+      // Native FormData
+      const form = new FormData();
 
-      `https://graph.facebook.com/v23.0/${PAGE_ID}/feed`,
+      form.append(
+        "source",
+        imageBlob,
+        "image.png"
+      );
 
-      {
+      form.append(
+        "message",
+        message
+      );
 
-        method:"POST",
+      form.append(
+        "access_token",
+        ACCESS_TOKEN
+      );
 
-        headers:{
-
-          "Content-Type":"application/json"
-
-        },
-
-        body:JSON.stringify({
-
-          message,
-
-          access_token: ACCESS_TOKEN
-
-        })
-
-      }
-
-    );
-
-
-
-    const data = await response.json();
-
-
-
-    if(!response.ok){
-
-      throw new Error(
-        JSON.stringify(data)
+      response = await fetch(
+        `https://graph.facebook.com/v23.0/${PAGE_ID}/photos`,
+        {
+          method: "POST",
+          body: form
+        }
       );
 
     }
 
+    // -------------------------------------------------
+    // TEXT POST
+    // -------------------------------------------------
+    else {
 
+      response = await fetch(
+        `https://graph.facebook.com/v23.0/${PAGE_ID}/feed`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+
+            message,
+
+            access_token: ACCESS_TOKEN
+
+          })
+
+        }
+      );
+
+    }
+
+    const data = await response.json();
+
+    console.log("================================");
+    console.log("Facebook Response");
+    console.log(JSON.stringify(data, null, 2));
+    console.log("================================");
+
+    if (!response.ok) {
+
+      return {
+
+        success: false,
+
+        message:
+          data?.error?.message ||
+          JSON.stringify(data)
+
+      };
+
+    }
+
+    console.log("Facebook upload successful.");
 
     return {
 
-      success:true,
+      success: true,
 
-      message:"Facebook post published successfully.",
+      message:
+        "Facebook post published successfully.",
 
-      facebookPostId:data.id,
+      facebookPostId:
+        data.post_id || data.id,
 
-      facebookPayload:{
+      facebookPayload: {
 
-        title:title.trim(),
+        title,
 
-        message
+        message,
+
+        imagePath: imagePath || null
 
       }
 
     };
 
-
-
   }
 
-  catch(error){
+  catch (error) {
 
+    console.error(error);
 
     return {
 
-      success:false,
+      success: false,
 
-      message:error.message
+      message:
+        error.message
 
     };
 
-
   }
-
 
 }

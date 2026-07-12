@@ -14,9 +14,9 @@ export function generateImagePrompt(post = {}) {
     : String(post.facts || '');
   const caption = post.caption || '';
   const question = post.question || '';
-  const hashtags = Array.isArray(post.hashtags)
-    ? post.hashtags.join(' ')
-    : String(post.hashtags || '');
+//   const hashtags = Array.isArray(post.hashtags)
+//     ? post.hashtags.join(' ')
+//     : String(post.hashtags || '');
 
   // Build a concise topic summary from the available content.
   const topicSummary = [title, facts, caption, question,]
@@ -25,20 +25,38 @@ export function generateImagePrompt(post = {}) {
     .trim();
 
   // Create a structured prompt that is suitable for a high-quality background image.
-  return [
-    'Scene:',
-    `Create a photorealistic Facebook background image that visually represents the topic: ${topicSummary}.`,
-    'People:',
-    'Show a warm, natural, and relatable scene with one or two people, preferably older adults in a realistic everyday setting, with calm and positive facial expressions. Avoid exaggerated poses or staged emotion.',
-    'Environment:',
-    'Use a clean, welcoming, and authentic environment that feels appropriate for an American audience aged 65+. The setting should feel comfortable, friendly, and believable, such as a home, community space, park, small-town street, or family gathering scene.',
-    'Lighting:',
-    'Use warm natural lighting with soft daylight or gentle indoor illumination. The mood should feel bright, inviting, and realistic.',
-    'Camera:',
-    'Use a high-quality photography style with a wide 16:9 composition, clean framing, and balanced visual hierarchy. Keep the composition elegant and suitable for a Facebook cover or background image.',
-    'Style:',
-    'Photorealistic, high detail, cinematic but natural, crisp focus, realistic textures, and professional composition. The image should feel polished and emotionally warm.',
-    'Restrictions:',
-    'Do not include any text inside the image. Do not include logos, watermarks, brand marks, or visible signage. Avoid violence, politics, religion, disturbing content, and anything that would feel inappropriate for older adults. Keep the scene safe, positive, and emotionally comfortable.'
-  ].join('\n');
+  return `
+Create a highly realistic Facebook post image.
+
+Topic:
+${topicSummary}
+
+Requirements:
+
+• Photorealistic
+• American seniors (65+)
+• Natural smiles
+• Warm emotions
+• Authentic lifestyle
+• High-quality DSLR photography
+• Soft natural sunlight
+• Cinematic composition
+• Ultra realistic skin
+• Professional color grading
+• 16:9 aspect ratio
+• Facebook friendly
+• No text
+• No logos
+• No watermark
+• No blur
+• No cartoon
+• No illustration
+• No AI artifacts
+• No deformed hands
+• No extra fingers
+• No distorted face
+• Extremely detailed
+• Sharp focus
+• Positive atmosphere
+`;
 }

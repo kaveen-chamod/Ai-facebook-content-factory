@@ -2,12 +2,12 @@
 // This service keeps the generation and storage steps separated while following the project's modular architecture.
 
 import { buildFacebookPostPrompt } from '../prompts/facebookPostPrompt.js';
-import { generateContent } from './geminiService.js';
+import { generateContent } from './groqService.js';
 import { supabase } from './supabaseService.js';
 
 /**
- * Extract a JSON object from Gemini output, even if it is wrapped in markdown code fences.
- * @param {string} responseText - Raw text returned by Gemini.
+ * Extract a JSON object from Groq output, even if it is wrapped in markdown code fences.
+ * @param {string} responseText - Raw text returned by Groq.
  * @returns {object} Parsed JSON object.
  */
 function parseGeneratedJson(responseText) {
