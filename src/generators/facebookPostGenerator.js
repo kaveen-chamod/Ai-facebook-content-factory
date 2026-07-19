@@ -1,7 +1,7 @@
-// Import the reusable Gemini service
-import { generateContent } from '../services/geminiService.js';
+// Import the reusable AI provider factory
+import { createAIProvider } from '../providers/ai/providerFactory.js';
 
-// JSON schema so Gemini returns the exact Facebook post structure
+// JSON schema so the AI provider returns the exact Facebook post structure
 const FACEBOOK_POST_SCHEMA = {
   type: 'object',
   properties: {
@@ -45,7 +45,8 @@ Return ONLY valid JSON with exactly these fields:
 
 Do not include markdown, code fences, or any text outside the JSON object.`;
 
-  const responseText = await generateContent(prompt, {
+  const provider = createAIProvider();
+  const responseText = await provider.generateContent(prompt, {
     responseMimeType: 'application/json',
     responseSchema: FACEBOOK_POST_SCHEMA,
   });

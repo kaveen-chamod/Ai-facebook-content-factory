@@ -1,5 +1,13 @@
+import express from 'express';
 import { testConnection } from './services/supabaseService.js';
-import { generateAndSavePost } from './services/postService.js';
+import { startPostScheduler } from './scheduler/postScheduler.js';
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+  res.send('AI Facebook Content Factory is running!');
+});
 
 async function main() {
   try {
@@ -7,12 +15,13 @@ async function main() {
     console.log('✅ Supabase Connected');
     console.log('Returned row:', connectionResult.data);
 
-    const insertedPost = await generateAndSavePost();
+    startPostScheduler();
 
-    console.log('✅ Post generated successfully');
-    console.log('Inserted row:', insertedPost);
+    app.listen(PORT, () => {
+      console.log(`🌐 Server is listening on port ${PORT}`);
+    });
   } catch (error) {
-    console.error('Post workflow failed:', error.message);
+    console.error('Startup failed:', error.message);
     process.exit(1);
   }
 }

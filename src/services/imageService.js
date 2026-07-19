@@ -1,6 +1,7 @@
 // Purpose: Generate images using the configured provider.
 
 import { createImageProvider } from "../providers/image/providerFactory.js";
+import { retryAsync } from "../utils/retry.js";
 
 /**
  * Generate an image using the configured provider.
@@ -20,28 +21,32 @@ export async function generateImage(prompt) {
         const provider = createImageProvider();
         console.log("Using provider:", provider.constructor.name);
 
-        // Generate image
-        const result = await provider.generateImage(prompt);
+        const result = await retryAsync(
+            async () => {
+                const res = await provider.generateImage(prompt);
 
-        // Provider returned an error
-        if (!result.success) {
-            throw new Error(result.message);
-        }
+                if (!res.success) {
+                    throw new Error(res.message);
+                }
+
+                return res;
+            }
+        );
 
         return {
             success: true,
             imagePath: result.imagePath,
         };
 
-    }catch (error) {
+    } catch (error) {
 
-    console.error("IMAGE ERROR:");
-    console.error(error);
+        console.error("IMAGE ERROR:");
+        console.error(error);
 
-    throw new Error(
-        `Image generation failed: ${error.message || JSON.stringify(error)}`
-    );
+        throw new Error(
+            `Image generation failed: ${error.message || JSON.stringify(error)}`
+        );
 
-}
+    }
 
 }
